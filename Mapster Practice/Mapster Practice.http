@@ -1,0 +1,6 @@
+@Mapster_Practice_HostAddress = http://localhost:5063
+
+GET {{Mapster_Practice_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
