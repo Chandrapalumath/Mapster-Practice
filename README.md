@@ -25,27 +25,39 @@ The project follows a clean, layered architecture to ensure separation of concer
 
 ---
 
-## 🚀 How to Run
+## 🧠 Mapster Technical Reference & Advanced Concepts
 
-1. **Clone the repo**: `git clone <your-repo-url>`
-2. **Restore Packages**: `dotnet restore`
-3. **Run the Project**: `dotnet run`
-4. **Test via Swagger**: Navigate to `https://localhost:<port>/swagger` to execute the `GET /api/User` endpoints.
+This project demonstrates a range of **Mapster** features, moving from basic object copying to complex, logic-based transformations.
+
+### 1. Core Execution Methods
+These methods determine *how* and *when* the mapping is executed within the application lifecycle.
+
+| Method | Purpose |
+| :--- | :--- |
+| **`.Adapt<T>()`** | The standard extension method for in-memory mapping from a Source object to a Destination type. |
+| **`.ProjectToType<T>()`** | **High Performance:** Used with `IQueryable` (EF Core). It translates mapping logic directly into a SQL `SELECT` statement, fetching only required columns. |
+| **`.BuildAdapter()`** | Creates an instance-based adapter. Useful for scenarios requiring specific dependency injection or localized mapping logic. |
 
 ---
 
-## 🧠 Advanced Concepts Covered
+### 2. Mapping Configuration Keywords
+These keywords are used within `TypeAdapterConfig<Source, Dest>.NewConfig()` to handle non-standard requirements.
 
-### Core Methods Used
-- **`.Adapt<T>()`**: The primary extension method for object-to-object mapping.
-- **`TypeAdapterConfig`**: Used in `MapsterConfig.cs` to define global, reusable mapping rules.
+* **`Map`**: Defines explicit logic when property names differ or require transformation (e.g., merging `FirstName` and `LastName`).
+* **`Ignore`**: Essential for security; it prevents specific sensitive fields (like `PasswordHash` or `InternalId`) from being mapped to the DTO.
+* **`AfterMapping`**: A post-processing hook that executes custom logic once the main mapping is finished.
+* **`Flattening`**: Mapster's ability to automatically map nested properties (e.g., `User.Address.City`) to a flat DTO property (e.g., `City`).
+* **`TwoWay`**: A productivity booster that ensures mapping rules created for `Source -> Dest` are automatically applied in reverse for `Dest -> Source`.
+* **`MapWith`**: Used for complete control; allows you to provide a custom factory method to instantiate and populate the destination object.
+* **`ConstructUsing`**: Explicitly tells Mapster which constructor to call if the destination class lacks a default parameterless constructor.
+* **`PreserveReference`**: **Critical for Complex Graphs:** Prevents infinite loops when mapping objects with circular references (e.g., a Parent referencing a Child that references the Parent).
+* **`ShallowCopyForSameType`**: An optimization setting that tells Mapster to perform a shallow copy instead of a deep copy when the source and destination types are identical.
 
-### Key Mapping Keywords
-- **`Map`**: Used for custom logic when property names don't match.
-- **`Ignore`**: Used to prevent specific sensitive fields from being mapped.
-- **`Flattening`**: Automatic mapping of sub-properties (e.g., `Address.City` to `AddressCity`).
-- **`ProjectToType`**: (Concept) Used for efficient EF Core queries to map directly at the database level.
+---
 
+### 3. Architecture & Performance
+* **Decoupling**: By using these keywords in a centralized `MapsterConfig.cs`, the Business Logic (Services) remains clean and unaware of transformation details.
+* **Compiled Mapping**: Mentioned as a "Pro-feature," Mapster can utilize **Code Generation** via its CLI tool to write mapping code at compile-time, eliminating reflection overhead and matching the speed of manual assignment.
 ---
 
 ## 📝 Learning Outcomes
